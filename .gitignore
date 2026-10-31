@@ -1,0 +1,6 @@
+node_modules
+dist
+.DS_Store
+~$*.xlsx
+# Excel から自動生成する（npm run convert）。元データは G検定_用語集.xlsx
+src/data/*.json
