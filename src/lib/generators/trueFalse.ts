@@ -25,6 +25,7 @@ export function makeTrueFalse(data: Dataset, item: ClozeItem, rng: Rng, forceTru
   const entry = data.glossary.find((g) => g.no === item.no);
   return {
     kind: 'truefalse',
+    clozeId: item.id,
     key: keys.cloze(item.id),
     label: `${item.id}（用語集No.${item.no}）`,
     field: entry?.field ?? '',

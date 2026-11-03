@@ -5,14 +5,21 @@ import { ChoiceQuestion } from './ChoiceQuestion';
 import { TrueFalseQuestion } from './TrueFalseQuestion';
 import { MatchingQuestion } from './MatchingQuestion';
 import { Feedback } from './Feedback';
+import { EditPanel, type Change } from './EditPanel';
+import { editId, type Edit } from '../lib/edits';
+import { rebuildQuestion } from '../lib/generators';
+import { defaultRng } from '../lib/random';
 
 type Answer = { kind: 'choice'; index: number } | { kind: 'tf'; value: boolean } | { kind: 'match'; pairs: Record<number, number> };
 
 export function QuizRunner({
   data,
   title,
-  questions,
+  questions: initialQuestions,
   notice,
+  editMode,
+  edits,
+  onSaveEdits,
   onFinish,
   onQuit,
 }: {
@@ -20,26 +27,48 @@ export function QuizRunner({
   title: string;
   questions: Question[];
   notice?: string;
+  editMode: boolean;
+  edits: Edit[];
+  /** 修正を保存し、反映後のデータを返す */
+  onSaveEdits: (changes: Change[]) => Dataset;
   onFinish: (records: AnswerRecord[]) => void;
   onQuit: () => void;
 }) {
+  const [questions, setQuestions] = useState(initialQuestions);
   const [i, setI] = useState(0);
   const [answer, setAnswer] = useState<Answer | null>(null);
-  const [records, setRecords] = useState<AnswerRecord[]>([]);
+  // 問題ごとの回答記録（修正して作り直した問題は、答え直した結果で置き換える）
+  const [records, setRecords] = useState<AnswerRecord[][]>([]);
+  const [editing, setEditing] = useState(false);
+  const [rebuilt, setRebuilt] = useState(0);
+  const [rebuiltAt, setRebuiltAt] = useState<number | null>(null);
   const q = questions[i];
 
   const commit = (a: Answer, recs: AnswerRecord[]) => {
     recs.forEach(recordAnswer);
-    setRecords((r) => [...r, ...recs]);
+    setRecords((r) => Object.assign([...r], { [i]: recs }));
     setAnswer(a);
   };
 
   const next = () => {
-    if (i + 1 >= questions.length) return onFinish(records);
+    if (i + 1 >= questions.length) return onFinish(records.flat());
     setI(i + 1);
     setAnswer(null);
+    setEditing(false);
     window.scrollTo(0, 0);
   };
+
+  const saveEdits = (changes: Change[]) => {
+    const newData = onSaveEdits(changes);
+    setQuestions((qs) => Object.assign([...qs], { [i]: rebuildQuestion(newData, qs[i], defaultRng) }));
+    setRecords((r) => Object.assign([...r], { [i]: [] }));
+    setAnswer(null);
+    setEditing(false);
+    setRebuilt((n) => n + 1);
+    setRebuiltAt(i);
+    window.scrollTo(0, 0);
+  };
+  const editedIds = new Set(edits.map(editId));
 
   let correct: boolean | null = null;
   let body;
@@ -112,11 +141,24 @@ export function QuizRunner({
       </div>
       {notice && i === 0 && <p className="notice">{notice}</p>}
 
-      {body}
+      <div key={`${i}-${rebuilt}`} className="stack">
+        {rebuiltAt === i && !answer && <p className="notice">修正を保存し、問題を作り直しました。</p>}
+        {body}
+      </div>
 
-      <p className="qid" title="問題の誤りを報告するときにお使いください">
-        {q.label}
-      </p>
+      <div className="qid-row">
+        {editMode && !editing && (
+          <button className="edit-open" onClick={() => setEditing(true)}>
+            ✎ 問題を修正
+          </button>
+        )}
+        <p className="qid" title="問題の誤りを報告するときにお使いください">
+          {q.label}
+        </p>
+      </div>
+      {editMode && editing && (
+        <EditPanel key={`${i}-${rebuilt}`} data={data} question={q} editedIds={editedIds} onSave={saveEdits} onClose={() => setEditing(false)} />
+      )}
 
       {answer && (
         <>

@@ -51,8 +51,14 @@ export interface Dataset {
 
 export type QuizKind = 'term' | 'reverse' | 'matching' | 'truefalse' | 'compare';
 
+/** 問題を作り直す（編集モードで修正したあと）ための元データの情報 */
+export type ChoiceSource =
+  | { type: 'term' | 'reverse'; no: number; choiceNos: number[] }
+  | { type: 'compare'; themeId: string; aspect: string; mode: 'feature2term' | 'term2feature'; term: string };
+
 export interface ChoiceQuestion {
   kind: 'term' | 'reverse' | 'compare';
+  source: ChoiceSource;
   /** 苦手リストのキー */
   key: string;
   /** 画面に小さく表示する識別子（問題ID・用語集No など） */
@@ -76,7 +82,7 @@ export interface MatchingQuestion {
   /** 用語の表示順（シャッフル済み） */
   terms: { no: number; name: string }[];
   /** 説明の表示順（シャッフル済み）。owner は正解の用語No */
-  phrases: { text: string; owner: number; clozeId: string }[];
+  phrases: { text: string; owner: number; clozeId: string; n: number }[];
   explanationNos: number[];
   /** 各用語の苦手キーと分野 */
   itemKeys: Record<number, { key: string; field: string }>;
@@ -90,6 +96,7 @@ export interface Segment {
 
 export interface TrueFalseQuestion {
   kind: 'truefalse';
+  clozeId: string;
   key: string;
   label: string;
   field: string;

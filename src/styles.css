@@ -595,3 +595,190 @@ td.num small {
   padding-left: 20px;
   font-size: 0.88rem;
 }
+
+/* ---- 編集モード ---- */
+.edit-mode-bar {
+  border-color: var(--primary);
+}
+.edit-mode-bar .hint {
+  margin: 2px 0 10px;
+}
+.edit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.qid-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: -4px;
+}
+.qid-row .qid {
+  margin: 0 0 0 auto;
+}
+.edit-open {
+  min-height: 40px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1.5px dashed var(--primary);
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.edit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.edit-panel .hint {
+  margin: 0;
+}
+.edit-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.edit-group {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 10px;
+}
+.edit-group summary {
+  padding: 10px 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.edit-field input,
+.edit-field textarea {
+  font: inherit;
+  font-size: 16px; /* iOS で入力時に拡大されないように */
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  width: 100%;
+  line-height: 1.6;
+}
+.edit-field textarea {
+  resize: vertical;
+}
+.edit-field input:focus,
+.edit-field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.edit-field em {
+  font-style: normal;
+  font-size: 0.7rem;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.edit-field .edited {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.edit-field .dirty {
+  background: var(--mark);
+  color: var(--text);
+}
+.edit-errors {
+  margin: 0;
+  padding: 10px 10px 10px 28px;
+  border-radius: 10px;
+  background: var(--ng-soft);
+  color: var(--ng);
+  font-size: 0.88rem;
+}
+.steps {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+.steps code {
+  font-size: 0.82rem;
+  background: var(--bg);
+  padding: 1px 4px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+.edit-item .diff {
+  margin-top: 8px;
+  font-size: 0.88rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.diff del {
+  color: var(--ng);
+  background: var(--ng-soft);
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.diff ins {
+  color: var(--ok);
+  background: var(--ok-soft);
+  text-decoration: none;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.status {
+  flex: none;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+.status.pending {
+  background: var(--mark);
+}
+.status.applied {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.status.conflict {
+  background: var(--ng-soft);
+  color: var(--ng);
+}
+.right {
+  text-align: right;
+}
+.diff-inline {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+.diff-inline del {
+  color: var(--ng);
+  background: var(--ng-soft);
+  padding: 0 2px;
+}
+.diff-inline ins {
+  color: var(--ok);
+  background: var(--ok-soft);
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0 2px;
+}
+.diff-full summary {
+  font-size: 0.8rem;
+  color: var(--primary);
+  cursor: pointer;
+  margin-top: 6px;
+}

@@ -13,7 +13,9 @@
     "pretest": "npm run convert",
     "test": "vitest run",
     "preaudit": "npm run convert",
-    "audit": "tsx scripts/audit.ts"
+    "audit": "tsx scripts/audit.ts",
+    "apply-edits": "python3 scripts/apply_edits.py",
+    "postapply-edits": "npm run audit"
   },
   "dependencies": {
     "react": "^19.3.1",

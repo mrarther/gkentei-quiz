@@ -2,7 +2,7 @@ import type { Dataset, Question, QuizKind } from '../../types';
 import { entryPasses, glossaryIndex, keys, type QuizFilter } from '../filter';
 import { sample, shuffle, type Rng } from '../random';
 import { makeCompareQuestion } from './compare';
-import { buildMatchingSets, MATCH_SIZE } from './matching';
+import { buildMatchingSets, MATCH_SIZE, stripWrapping } from './matching';
 import { makeReverseQuestion } from './reverseQuiz';
 import { makeTermQuestion } from './termQuiz';
 import { makeTrueFalse } from './trueFalse';
@@ -50,3 +50,44 @@ export function generateQuiz(data: Dataset, kind: QuizKind, count: number, filte
   }
 }
 
+
+/**
+ * 修正したデータで、同じ元データから問題を作り直す（編集モード用）。
+ * 用語当て・逆引きは同じ選択肢の用語、正誤は正しい文／誤りの文の別、比較は同じ形式を保つ。
+ */
+export function rebuildQuestion(data: Dataset, q: Question, rng: Rng): Question {
+  const idx = glossaryIndex(data);
+  switch (q.kind) {
+    case 'term':
+    case 'reverse': {
+      if (q.source.type === 'compare') return q;
+      const [no, ...others] = q.source.choiceNos;
+      const e = idx.get(no);
+      if (!e) return q;
+      // 誤答も同じ用語のまま、表示だけ新しいデータにする
+      const pool = { ...data, glossary: data.glossary.filter((g) => g.no === no || others.includes(g.no)) };
+      return (q.kind === 'term' ? makeTermQuestion : makeReverseQuestion)(pool, e, rng);
+    }
+    case 'compare': {
+      if (q.source.type !== 'compare') return q;
+      const { themeId, aspect, mode, term } = q.source;
+      const theme = data.compare.find((t) => t.id === themeId);
+      return theme ? makeCompareQuestion(data, theme, aspect, rng, { mode, term }) : q;
+    }
+    case 'truefalse': {
+      const item = data.cloze.find((c) => c.id === q.clozeId);
+      return item ? makeTrueFalse(data, item, rng, q.isTrue) : q;
+    }
+    case 'matching': {
+      // 組はそのままで、用語名と語句だけ新しいデータにする
+      return {
+        ...q,
+        terms: q.terms.map((t) => ({ ...t, name: idx.get(t.no)?.term ?? t.name })),
+        phrases: q.phrases.map((p) => {
+          const b = data.cloze.find((c) => c.id === p.clozeId)?.blanks.find((x) => x.n === p.n);
+          return b ? { ...p, text: stripWrapping(b.answer) } : p;
+        }),
+      };
+    }
+  }
+}

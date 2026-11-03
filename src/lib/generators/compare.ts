@@ -32,6 +32,7 @@ export function makeCompareQuestion(
   const field = data.glossary.find((g) => g.no === target.no)?.field ?? '';
   const base = {
     kind: 'compare' as const,
+    source: { type: 'compare' as const, themeId: theme.id, aspect: aspectName, mode, term: target.term },
     key: keys.compare(theme.id, aspectName),
     label: `${theme.id}／${aspectName}（用語集No.${target.no}）`,
     field,

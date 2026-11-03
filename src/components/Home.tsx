@@ -32,7 +32,23 @@ function initialSettings(fields: string[]): Settings {
   };
 }
 
-export function Home({ data, notice, onStart }: { data: Dataset; notice?: string; onStart: (s: Settings) => void }) {
+export function Home({
+  data,
+  notice,
+  onStart,
+  editMode,
+  editCount,
+  onOpenEdits,
+  onEditModeChange,
+}: {
+  data: Dataset;
+  notice?: string;
+  onStart: (s: Settings) => void;
+  editMode: boolean;
+  editCount: number;
+  onOpenEdits: () => void;
+  onEditModeChange: (on: boolean) => void;
+}) {
   const fieldCounts = useMemo(() => {
     const m = new Map<string, number>();
     data.glossary.forEach((g) => m.set(g.field, (m.get(g.field) ?? 0) + 1));
@@ -54,6 +70,22 @@ export function Home({ data, notice, onStart }: { data: Dataset; notice?: string
   return (
     <div className="stack">
       {notice && <p className="notice">{notice}</p>}
+      {editMode && (
+        <section className="card edit-mode-bar">
+          <div>
+            <strong>✎ 編集モード</strong>
+            <p className="hint">回答画面で問題データを直せます。修正はこのブラウザにだけ保存されます。</p>
+          </div>
+          <div className="edit-actions">
+            <button className="primary" onClick={onOpenEdits}>
+              修正の一覧（{editCount}件）
+            </button>
+            <button className="secondary" onClick={() => onEditModeChange(false)}>
+              編集モードを終える
+            </button>
+          </div>
+        </section>
+      )}
 
       <section className="card">
         <h2>クイズの種類</h2>

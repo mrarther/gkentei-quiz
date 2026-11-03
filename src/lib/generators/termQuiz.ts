@@ -13,6 +13,7 @@ export function makeTermQuestion(data: Dataset, e: GlossaryEntry, rng: Rng, warn
   if (supplemented) warn?.('supplement', `分野「${e.field}」は語が少ないため、他の分野から誤答を補いました（No.${e.no}）`);
   return {
     kind: 'term',
+    source: { type: 'term', no: e.no, choiceNos: [e.no, ...entries.map((g) => g.no)] },
     key: keys.term(e.no),
     label: `用語集No.${e.no}`,
     field: e.field,

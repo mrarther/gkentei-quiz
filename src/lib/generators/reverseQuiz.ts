@@ -15,6 +15,7 @@ export function makeReverseQuestion(data: Dataset, e: GlossaryEntry, rng: Rng, w
   }
   return {
     kind: 'reverse',
+    source: { type: 'reverse', no: e.no, choiceNos: [e.no, ...entries.map((g) => g.no)] },
     key: keys.term(e.no),
     label: `用語集No.${e.no}`,
     field: e.field,

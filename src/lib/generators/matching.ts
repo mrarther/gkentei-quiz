@@ -36,8 +36,8 @@ export function isUsablePhrase(s: string): boolean {
 const contains = (text: string, phrase: string) => findAliasRanges(text, [phrase]).length > 0;
 
 /** 用語No → マッチングに使える語句（穴埋めの正解のうち条件を満たすもの） */
-export function matchingPhrases(data: Dataset): Map<number, { text: string; clozeId: string }[]> {
-  const map = new Map<number, { text: string; clozeId: string }[]>();
+export function matchingPhrases(data: Dataset): Map<number, { text: string; clozeId: string; n: number }[]> {
+  const map = new Map<number, { text: string; clozeId: string; n: number }[]>();
   const byNo = new Map(data.glossary.map((g) => [g.no, g]));
   for (const c of data.cloze) {
     const g = byNo.get(c.no);
@@ -48,17 +48,17 @@ export function matchingPhrases(data: Dataset): Map<number, { text: string; cloz
       // 語句が用語名そのもの（を含む）なら答えが分かってしまう
       if (findAliasRanges(text, termAliases(g.term)).length) continue;
       const list = map.get(c.no) ?? [];
-      if (!list.some((x) => x.text === text)) list.push({ text, clozeId: c.id });
+      if (!list.some((x) => x.text === text)) list.push({ text, clozeId: c.id, n: b.n });
       map.set(c.no, list);
     }
   }
   return map;
 }
 
-type Pair = { e: GlossaryEntry; phrase: { text: string; clozeId: string } };
+type Pair = { e: GlossaryEntry; phrase: { text: string; clozeId: string; n: number } };
 
 /** 既に選んだ組と衝突しない語句を探す（語句は自分の解説にだけ出てくること） */
-function fitPhrase(e: GlossaryEntry, chosen: Pair[], phrases: { text: string; clozeId: string }[], rng: Rng) {
+function fitPhrase(e: GlossaryEntry, chosen: Pair[], phrases: { text: string; clozeId: string; n: number }[], rng: Rng) {
   if (chosen.some((p) => p.e.term === e.term)) return null;
   // 既に選んだ語句が、新しい用語の解説に出てくるなら、その用語は入れられない
   if (chosen.some((p) => contains(e.meaning, p.phrase.text))) return null;
@@ -77,7 +77,7 @@ function toQuestion(pairs: Pair[], rng: Rng): MatchingQuestion {
     label: `用語集No.${pairs.map((p) => p.e.no).join(', ')}`,
     field: pairs[0].e.field,
     terms: shuffle(pairs.map((p) => ({ no: p.e.no, name: p.e.term })), rng),
-    phrases: shuffle(pairs.map((p) => ({ text: p.phrase.text, owner: p.e.no, clozeId: p.phrase.clozeId })), rng),
+    phrases: shuffle(pairs.map((p) => ({ text: p.phrase.text, owner: p.e.no, clozeId: p.phrase.clozeId, n: p.phrase.n })), rng),
     explanationNos: pairs.map((p) => p.e.no),
     itemKeys: Object.fromEntries(pairs.map((p) => [p.e.no, { key: keys.term(p.e.no), field: p.e.field }])),
   };
